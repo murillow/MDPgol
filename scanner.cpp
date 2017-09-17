@@ -3,7 +3,7 @@
 using namespace std;
 
 #define MAX_STATES 20
-#define MAX_CHARSET 15
+#define MAX_CHARSET 16
 
 int sigma[MAX_STATES][MAX_CHARSET];
 
@@ -16,10 +16,12 @@ inline int charToCol(char c) {
     return c - 38;
   } else if (c >= 60 && c <= 62) {
     return c - 50;
-  } else if (c == 59) {
+  } else if (c == 34) {
     return 13;
-  } else {
+  } else if (c == 59) {
     return 14;
+  } else {
+    return 15;
   }
 }
 
