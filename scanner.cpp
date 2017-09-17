@@ -26,25 +26,25 @@ inline int charToCol(char c) {
 int main() {
   char caracter, pause;
 
-  //Cria um fluxo de arquivo a partir de "texto.alg"
+  // Cria um fluxo de arquivo a partir de "texto.alg"
   ifstream myfile ("texto.alg");
 
-  //Testa se foi possivel abrir o arquivo
+  // Testa se foi possível abrir o arquivo
   if (myfile.is_open()) {
-    //Loop de leitura de caracteres
+    // Loop de leitura de caracteres
     while (myfile.get(caracter)) {
       if (caracter != '\n') {
-        //Imprime o caracter de uma linha
+        // Imprime o caractere de uma linha
         cout << caracter;
       } else {
-        //Pausa a cada linha esperando um "enter"
+        // Pausa a cada linha esperando um "enter"
         cin.get(pause);
       }
     }
-    //Fecha o fluxo de arquivo
+    // Fecha o fluxo de arquivo
     myfile.close();
   }
-  //Se o arquivo n�o for aberto
+  // Se o arquivo não for aberto
   else {
     cout << "Impossivel abrir o arquivo!\n";
   }
