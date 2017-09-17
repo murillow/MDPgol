@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define MAX_STATES 21
+#define MAX_STATES 20
 #define MAX_CHARSET 15
 
 int sigma[MAX_STATES][MAX_CHARSET];
