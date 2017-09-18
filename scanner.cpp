@@ -2,65 +2,89 @@
 
 using namespace std;
 
-#define MAX_STATES 21
-#define MAX_CHARSET 18
+#define MAX_STATES        20
+#define MAX_CHAR_CLASSES  20
 
-int sigma[MAX_STATES][MAX_CHARSET] = {
-/*Q/C  LL  DD  ((  ))  **  ++  ,,  --  ..  //  <<  ==  >>  ""  ;;  OO  EE  EOF
-/*q0*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*q1*/  7,  2, 17, 18, 16, 16, 20, 16, 20, 16, 10, 12, 11,  8, 19, 20,  7,  6,
-/*q2*/  0,  2,  0,  0,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  0,  0,  4,  0,
-/*q3*/  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*q4*/  0,  2,  0,  0,  0,  5,  0,  5,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*q5*/  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*q6*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*q7*/  7,  7,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  7,  0,
+int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
+/////   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
+/////  LL  DD  ((  ))  **  ++  ,,  --  ..  //  <<  ==  >>  ""  ;;  {{  }}  EE  OO  EOF
+/*0*/   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*1*/   7,  2, 17, 18, 16, 16, 18, 16, 18, 16, 10, 12, 11,  8, 19, 14,  0,  7,  0,  6,
+/*2*/   0,  2,  0,  0,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,
+/*3*/   0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*4*/   0,  2,  0,  0,  0,  5,  0,  5,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*5*/   0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*6*/   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*7*/   7,  7,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  7, 18,  0,
+/*8*/   8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  9,  8,  8,  8,  8,  8,  0,
+/*9*/   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*10*/  0,  0,  0,  0,  0,  0,  0, 13,  0,  0,  0, 12,  0,  0,  0,  0,  0,  0,  0,  0,
+/*11*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 12,  0,  0,  0,  0,  0,  0,  0,  0,
+/*12*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*13*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*14*/ 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 14, 14, 14,
+/*15*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*16*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*17*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*18*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*19*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-inline int charToCol(char c) {
+inline int symbolToCharClass(char c) {
   if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) {
-    return c == 69 ? 16 : 1;
+    return c == 69 ? 18 : 0;
   } else if (c >= 48 && c <= 57) {
-    return 2;
+    return 1;
   } else if (c >= 40 && c <= 47) {
-    return c - 37;
+    return c - 38;
   } else if (c >= 60 && c <= 62) {
-    return c - 49;
+    return c - 50;
   } else if (c == 34) {
-    return 14;
+    return 13;
   } else if (c == 59) {
+    return 14;
+  } else if (c == 123) {
     return 15;
+  } else if (c == 125) {
+    return 16;
   } else if (c == -1) {
-    return 17;
+    return 19;
   } else {
-    return 0;
+    return 17;
   }
 }
 
 int main() {
-  char caracter, pause;
+  char symbol;
+  string lex;
+  int state = 1, col = 0, line = 0, charClass, token;
 
-  // Cria um fluxo de arquivo a partir de "texto.alg"
-  ifstream myfile ("texto.alg");
+  ifstream source("texto.alg");
 
-  // Testa se foi possível abrir o arquivo
-  if (myfile.is_open()) {
-    // Loop de leitura de caracteres
-    while (myfile.get(caracter)) {
-      if (caracter != '\n') {
-        // Imprime o caractere de uma linha
-        cout << caracter;
+  if (source.is_open()) {
+    while (source.get(symbol)) {
+      //while (isspace(symbol)) {
+      //  cout << symbol << endl;
+      //  source.get(symbol);
+      //}
+      if (symbol == '\n') {
+        line++;
+        col = 0, state = 1;
+        cout << lex << endl;
+        lex.clear();
       } else {
-        // Pausa a cada linha esperando um "enter"
-        cin.get(pause);
+        charClass = symbolToCharClass(symbol);
+        if (sigma[state][charClass]) {
+          lex.push_back(symbol);
+          state = sigma[state][charClass];
+        } else {  
+        }
       }
+      col++;    
     }
-    // Fecha o fluxo de arquivo
-    myfile.close();
-  }
-  // Se o arquivo não for aberto
-  else {
-    cout << "Impossivel abrir o arquivo!\n";
+    cout << lex << endl;
+  } else {
+    cout << "Impossível abrir o arquivo!\n";
   }
   return 0;
 }
