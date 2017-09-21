@@ -80,36 +80,40 @@ int main(int argc, char *argv[]) {
   ifstream source("texto.alg");
 
   if (source.is_open()) {
-    while (source.get(symbol) || source.eof()) {
+      bool read = true;
+    while (true) {
+        if (symbol == '\n' && read) {
+          line++;
+          col = 0;
+          }
+      if(source.eof())
+        symbol = EOF;
+      else if (read) {
+        source.get(symbol);
+        col++;
+      }
+      read = true;
       charClass = symbolToCharClass(symbol);
       nextState = sigma[state][charClass];
-      if (symbol == '\n') {
-        line++;
-        col = 0;
-      }
-      if (state < 0 || source.eof()) {
+      if (nextState < 0) {
+        insertToken(lex, make_token(nextState));
         cout << argv[0] << ":" << line << ":" << ":" << col << "erro: ";
-        if (source.eof()){
-          symbol = EOF;
-          charClass = symbolToCharClass(symbol);
-          state = sigma[state][charClass];
-        }
-        showError(state);
+        showError(nextState);
         exit(EXIT_FAILURE);
       }
-      if (nextState) {
+      else if (nextState > 0 && (state != 10 || nextState != 10)) {
         lex.push_back(symbol);
       }
-      else {
-        if (lex.size() >= 1) insertToken(lex, make_token(state));
-        lex.clear();
-        if (sigma[nextState][charClass]) {
-          nextState = sigma[nextState][charClass];
-          lex.push_back(symbol);
+      else { //nextstate == 0
+        if (lex.size() >= 1 && lex != "{") {
+            insertToken(lex, make_token(state));
+            lex.clear();
+            read = false;
         }
       }
+      if(symbol == EOF)
+        break;
       state = nextState;
-      col++;
     }
   }
   else {
