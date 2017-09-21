@@ -149,30 +149,31 @@ void showError(int code) {
 }
 
 string make_token(int i) {
-  if (i == 1 || i == 3 || i == 6)
+  if (i == 1 || i == 3 || i == 6) {
     return "Num";
-  else if (i == 8)
+  } else if (i == 8) {
     return "Literal";
-  else if (i == 9)
+  } else if (i == 9) {
     return "id";
-  else if (i == 11)
+  } else if (i == 11) {
     return "Comentario";
-  else if (i == 12)
+  } else if (i == 12) {
     return "EOF";
-  else if (i == 13 || i == 14 || i == 15 || i == 16)
+  } else if (i == 13 || i == 14 || i == 15 || i == 16) {
     return "OPR";
-  else if (i == 17)
+  } else if (i == 17) {
     return "RCB";
-  else if (i == 18)
+  } else if (i == 18) {
     return "OPM";
-  else if (i == 19)
+  } else if (i == 19) {
     return "AB_P";
-  else if (i == 20)
+  } else if (i == 20) {
     return "FC_P";
-  else if (i == 21)
+  } else if (i == 21) {
     return "PT_V";
-  else
+  } else {
     return "ERRO";
+  }
 }
 
 void insertToken(string lex, string token) {
