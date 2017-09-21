@@ -80,15 +80,20 @@ int main(int argc, char *argv[]) {
   ifstream source("texto.alg");
 
   if (source.is_open()) {
-    while (source.get(symbol)) {
+    while (source.get(symbol) || source.eof()) {
       charClass = symbolToCharClass(symbol);
       nextState = sigma[state][charClass];
       if (symbol == '\n') {
         line++;
         col = 0;
       }
-      if (state < 0) {
+      if (state < 0 || source.eof()) {
         cout << argv[0] << ":" << line << ":" << ":" << col << "erro: ";
+        if (source.eof()){
+          symbol = EOF;
+          charClass = symbolToCharClass(symbol);
+          state = sigma[state][charClass];
+        }
         showError(state);
         exit(EXIT_FAILURE);
       }
@@ -163,7 +168,7 @@ inline void showError(int code) {
   if (code == -6) cout << "esperado tokens '+', '-' ou 'Num' (digito) depois do 'E'" << endl;
   if (code == -7) cout << "esperado um token 'Num' (digito)" << endl;
   if (code == -8) cout << "esperado um token '\"' para fechar o ultimo token '\"'" << endl;
-  if (code == -9) cout << "esperado um token '}' para fechar o ultimo '{'" << endl;  
+  if (code == -9) cout << "esperado um token '}' para fechar o ultimo '{'" << endl;
 }
 
 string make_token(int i) {
