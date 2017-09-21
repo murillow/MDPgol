@@ -32,31 +32,16 @@ int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 /*21*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-//q0        = estado inicial
-//q1 - q6   = estados Num
-//q7 - q8   = estados Literal
-//q9        = estado Identificador
-//q10 e q11 = estados Comentários
-//q12       = estado EOF
-//q13 - q16 = estados Operadores Relacionáis
-//q17       = estado Atribuição
-//q18       = estado Operadores Aritméticos
-//q19       = estado AB_P
-//q20       = estado FC_P
-//q21       = estado PT_V
-//q19       = estado ERRO
-
-//Map<Lexema, Token, Atributo>;
+// map <Lexema, Token, Atributo>
 map <string, pair <string, string> > symbolTable;
 
-//String auxiliar para guardar o ultimo lexema;
+// String auxiliar para guardar o ultimo lexema;
 pair <string, pair <string, string> > bufferLex;
 
 int       symbolToCharClass   (char);
 void      showError           (int);
 string    make_token          (int);
 void      insertToken         (string,  string);
-
 
 int main(int argc, char *argv[]) {
   string lex;
@@ -80,15 +65,15 @@ int main(int argc, char *argv[]) {
   ifstream source("texto.alg");
 
   if (source.is_open()) {
-      bool read = true;
+    bool read = true;
     while (true) {
-        if (symbol == '\n' && read) {
-          line++;
-          col = 0;
-          }
-      if(source.eof())
+      if (symbol == '\n' && read) {
+        line++;
+        col = 0;
+      }
+      if (source.eof()) {
         symbol = EOF;
-      else if (read) {
+      } else if (read) {
         source.get(symbol);
         col++;
       }
@@ -97,7 +82,7 @@ int main(int argc, char *argv[]) {
       nextState = sigma[state][charClass];
       if (nextState < 0) {
         insertToken(lex, make_token(nextState));
-        cout << argv[0] << ":" << line << ":" << ":" << col << "erro: ";
+        cout << argv[0] << ":" << line << ":" << col << "erro: ";
         showError(nextState);
         exit(EXIT_FAILURE);
       }
@@ -106,13 +91,12 @@ int main(int argc, char *argv[]) {
       }
       else { //nextstate == 0
         if (lex.size() >= 1 && lex != "{") {
-            insertToken(lex, make_token(state));
-            lex.clear();
-            read = false;
+          insertToken(lex, make_token(state));
+          lex.clear();
+          read = false;
         }
       }
-      if(symbol == EOF)
-        break;
+      if (symbol == EOF) break;
       state = nextState;
     }
   }
@@ -154,16 +138,7 @@ int symbolToCharClass(char c) {
   }
 }
 
-//-1        = token iniciado por '.'
-//-2        = token iniciado por '_'
-//-3        = token '}' sem um token '{' anterior
-//-4        = caractere inválido
-//-5        = esperado um token 'Num' (dígito)
-//-6        = esperado tokens '+', '-' ou 'Num' (dígito) depois do 'E'
-//-7        = esperado um token 'Num' (dígito)
-//-8        = esperado um token '"' para fechar o último token '"'
-//-9        = esperado um token '}' para fechar o último '{'
-inline void showError(int code) {
+void showError(int code) {
   if (code == -1) cout << "token iniciado por '.'" << endl;
   if (code == -2) cout << "token iniciado por '_'" << endl;
   if (code == -3) cout << "token '}' sem um token '{' anterior" << endl;
