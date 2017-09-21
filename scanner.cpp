@@ -2,35 +2,34 @@
 
 using namespace std;
 
-#define MAX_STATES 23
+#define MAX_STATES 22
 #define MAX_CHAR_CLASSES 23
 
 int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 ////// 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
 ////// \t, \n, SP, "", ((, )), **, ++, --, .., //, 09, ;;, <<, ==, >>, Az, EE, __, {{, }}, EF, OO,
-/*00*/  0,  0,  0,  7, 19, 20, 18, 18, 18, 22, 18,  1, 21, 13, 15, 14,  9,  9, 22, 10, 22, 12, 22,
-/*01*/  0,  0,  0, 22, 22,  0,  0,  0,  0,  2,  0,  1,  0,  0,  0,  0, 22,  4, 22,  0, 22, 22,  0,
-/*02*/  0,  0,  0, 22, 22, 22, 22, 22, 22, 22, 22,  3, 22, 22, 22, 22, 22, 22, 22,  0, 22, 22,  0,
-/*03*/  0,  0,  0, 22, 22,  0,  0,  0,  0, 22,  0,  3,  0,  0,  0,  0, 22,  4, 22,  0, 22, 22,  0,
-/*04*/  0,  0,  0, 22, 22, 22, 22,  5,  5, 22, 22,  6, 22, 22, 22, 22, 22, 22, 22,  0, 22, 22,  0,
-/*05*/  0,  0,  0, 22, 22, 22, 22, 22, 22, 22, 22,  6, 22, 22, 22, 22, 22, 22, 22,  0, 22, 22,  0,
-/*06*/  0,  0,  0, 22, 22,  0,  0,  0,  0, 22,  0,  6,  0,  0,  0,  0, 22, 22, 22,  0, 22, 22,  0,
-/*07*/  7,  7,  7,  8,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7, 22,  7,
+/*00*/  0,  0,  0,  7, 19, 20, 18, 18, 18, -1, 18,  1, 21, 13, 15, 14,  9,  9, -2, 10, -3, 12, -4,
+/*01*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  0,  1,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,
+/*02*/ -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5,  3, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5,
+/*03*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,
+/*04*/ -6, -6, -6, -6, -6, -6, -6,  5,  5, -6, -6,  6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6, -6,
+/*05*/ -7, -7, -7, -7, -7, -7, -7, -7, -7, -7, -7,  6, -7, -7, -7, -7, -7, -7, -7, -7, -7, -7, -7,
+/*06*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*07*/  7,  7,  7,  8,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7, -8,  7,
 /*08*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*09*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  9,  0,  0,  0,  0,  9,  9,  9,  0, 22,  0,  0,
-/*10*/ 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 22, 10,
-/*11*/  0,  0,  0,  0,  0, 22, 22, 22, 22, 22, 22,  0, 22, 22, 22, 22,  0,  0, 22,  0,  0,  0,  0,
+/*09*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  9,  0,  0,  0,  0,  9,  9,  9,  0,  0,  0,  0,
+/*10*/ 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, -9, 10,
+/*11*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 /*12*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-/*13*/  0,  0,  0, 22, 22, 22, 22, 22, 17, 22, 22,  0, 22, 22, 15, 16,  0,  0, 22,  0, 22, 22,  0,
-/*14*/  0,  0,  0, 22, 22, 22, 22, 22, 22, 22, 22,  0, 22, 22, 15, 22,  0,  0, 22,  0, 22, 22,  0,
-/*15*/  0,  0,  0, 22,  0,  0, 22, 22, 22, 22, 22,  0, 22, 22, 22, 22,  0,  0, 22,  0, 22, 22,  0,
-/*16*/  0,  0,  0, 22,  0,  0, 22, 22, 22, 22, 22,  0, 22, 22, 22, 22,  0,  0, 22,  0, 22, 22,  0,
-/*17*/  0,  0,  0, 22,  0,  0, 22, 22, 22, 22, 22,  0, 22, 22, 22, 22,  0,  0, 22,  0, 22, 22,  0,
-/*18*/  0,  0,  0, 22,  0, 22, 22, 22, 22, 22, 22,  0,  0, 22, 22, 22,  0,  0, 22,  0, 22, 22,  0,
-/*19*/  0,  0,  0,  0,  0,  0, 22, 22, 22, 22, 22,  0, 22, 22, 22, 22,  0,  0, 22,  0,  0, 22,  0,
-/*20*/  0,  0,  0,  0,  0,  0, 22, 22, 22, 22, 22, 22,  0,  0,  0,  0,  0,  0,  0,  0,  0, 22,  0,
-/*21*/  0,  0,  0, 22,  0, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22,  0,  0, 22,  0, 22,  0,  0,
-/*22*/  0, -1, -1, -9,-11,- 0,-13, -1, -1, -2, -1, -8, -7, -6,  0, -6, -5, -5, -3, -1, -4, -1, -1
+/*13*/  0,  0,  0,  0,  0,  0,  0,  0, 17,  0,  0,  0,  0,  0, 15, 16,  0,  0,  0,  0,  0,  0,  0,
+/*14*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 15,  0,  0,  0,  0,  0,  0,  0,  0,
+/*15*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*16*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*17*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*18*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*19*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*20*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+/*21*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
 //q0        = estado inicial
@@ -47,34 +46,17 @@ int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 //q21       = estado PT_V
 //q19       = estado ERRO
 
-//erros:
-//-1        = caractere desconhecido
-//-2        = ponto
-//-3        = underscore
-//-4        = abre chaves
-//-5        = fecha chaves
-//-6        = letra
-//-7        = comparação
-//-8        = ponto e vírgula
-//-9        = número
-//-10       = aspas
-//-11       = abre parênteses
-//-12       = fecha parênteses
-//-13       = EOF
-
 //Map<Lexema, Token, Atributo>;
-map<string, pair<string, string> > symbolTable;
+map <string, pair <string, string> > symbolTable;
 
 //String auxiliar para guardar o ultimo lexema;
-pair<string, pair<string, string> >bufferLex;
+pair <string, pair <string, string> > bufferLex;
 
+int       symbolToCharClass   (char);
+void      showError           (int);
+string    make_token          (int);
+void      insertToken         (string,  string);
 
-int     symbolToCharClass (char);
-void    showToken         (int);
-void    showError         (int);
-void    showTable         (void);
-void    insertSymbol      (string,  string);
-string  make_token        (int);
 
 int main(int argc, char *argv[]) {
   string lex;
@@ -82,19 +64,18 @@ int main(int argc, char *argv[]) {
   char symbol;
   int charClass, nextState, state = 0;
 
-  symbolTable["inicio"    ] = make_pair("inicio",   "");
-  symbolTable["varinicio" ] = make_pair("varinicio","");
-  symbolTable["varfim"    ] = make_pair("varfim",   "");
-  symbolTable["escreva"   ] = make_pair("escreva",  "");
-  symbolTable["leia"      ] = make_pair("leia",     "");
-  symbolTable["se"        ] = make_pair("se",       "");
-  symbolTable["entao"     ] = make_pair("entao",    "");
-  symbolTable["fimse"     ] = make_pair("fimse",    "");
-  symbolTable["fim"       ] = make_pair("fim",      "");
-  symbolTable["inteiro"   ] = make_pair("inteiro",  "");
-  symbolTable["literal"   ] = make_pair("literal",  "");
-  symbolTable["real"      ] = make_pair("real",     "");
-
+  symbolTable["inicio"]     = make_pair("inicio", "");
+  symbolTable["varinicio"]  = make_pair("varinicio", "");
+  symbolTable["varfim"]     = make_pair("varfim", "");
+  symbolTable["escreva"]    = make_pair("escreva", "");
+  symbolTable["leia"]       = make_pair("leia", "");
+  symbolTable["se"]         = make_pair("se", "");
+  symbolTable["entao"]      = make_pair("entao", "");
+  symbolTable["fimse"]      = make_pair("fimse", "");
+  symbolTable["fim"]        = make_pair("fim", "");
+  symbolTable["inteiro"]    = make_pair("inteiro", "");
+  symbolTable["literal"]    = make_pair("literal", "");
+  symbolTable["real"]       = make_pair("real", "");
 
   ifstream source("texto.alg");
 
@@ -106,19 +87,16 @@ int main(int argc, char *argv[]) {
         line++;
         col = 0;
       }
-      if (nextState == 22) {
-        cout << argv[0] << ":" << line << ":" << ":" << col << ": error: ";
-        showError(sigma[nextState][charClass]);
+      if (state < 0) {
+        cout << argv[0] << ":" << line << ":" << ":" << col << "erro: ";
+        showError(state);
         exit(EXIT_FAILURE);
       }
       if (nextState) {
         lex.push_back(symbol);
       }
       else {
-        //showToken(state);
-        if (lex.size() >= 1)
-          insertSymbol(lex, make_token(state));
-          //cout << lex << endl;
+        if (lex.size() >= 1) insertToken(lex, make_token(state));
         lex.clear();
         if (sigma[nextState][charClass]) {
           nextState = sigma[nextState][charClass];
@@ -132,9 +110,6 @@ int main(int argc, char *argv[]) {
   else {
     cout << "Programa fonte nao encontrado!\n";
   }
-
-  showTable();
-
   return 0;
 }
 
@@ -170,52 +145,38 @@ int symbolToCharClass(char c) {
   }
 }
 
-void showToken(int i) {
+//-1        = token iniciado por '.'
+//-2        = token iniciado por '_'
+//-3        = token '}' sem um token '{' anterior
+//-4        = caractere inválido
+//-5        = esperado um token 'Num' (dígito)
+//-6        = esperado tokens '+', '-' ou 'Num' (dígito) depois do 'E'
+//-7        = esperado um token 'Num' (dígito)
+//-8        = esperado um token '"' para fechar o último token '"'
+//-9        = esperado um token '}' para fechar o último '{'
+inline void showError(int code) {
+  if (code == -1) cout << "token iniciado por '.'" << endl;
+  if (code == -2) cout << "token iniciado por '_'" << endl;
+  if (code == -3) cout << "token '}' sem um token '{' anterior" << endl;
+  if (code == -4) cout << "caractere invalido" << endl;
+  if (code == -5) cout << "esperado um token 'Num' (digito)" << endl;
+  if (code == -6) cout << "esperado tokens '+', '-' ou 'Num' (digito) depois do 'E'" << endl;
+  if (code == -7) cout << "esperado um token 'Num' (digito)" << endl;
+  if (code == -8) cout << "esperado um token '\"' para fechar o ultimo token '\"'" << endl;
+  if (code == -9) cout << "esperado um token '}' para fechar o ultimo '{'" << endl;  
+}
+
+string make_token(int i) {
   if (i == 1 || i == 3 || i == 6)
-    cout << "Token: NUM\t";
+    return "Num";
   else if (i == 8)
-    cout << "Token: Literal\t";
-  else if (i == 9)
-    cout << "Token: ID\t";
-  else if (i == 11)
-    cout << "Token: Comentario\t";
-  else if (i == 12)
-    cout << "Token: End Of File\t";
-  else if (i == 13 || i == 14 || i == 15 || i == 16)
-    cout << "Token: Operador Relacional\t";
-  else if (i == 17)
-    cout << "Token: Atribuicao\t";
-  else if (i == 18)
-    cout << "Token: Operador Aritimetico\t ";
-  else if (i == 19)
-    cout << "Token: Abre Parentese\t";
-  else if (i == 20)
-    cout << "Token: Fecha Parentese\t";
-  else if (i == 21)
-    cout << "Token: Ponto e Virgula\t";
-}
-
-void showError(int code) {
-  printf("%d\n", code);
-}
-
-void showTable(void){
-  map<string, pair<string, string> >::iterator it;
-  for (it = symbolTable.begin(); it != symbolTable.end(); it++)
-    cout << setw(7) << it->second.first << " " << it->first << " " << it->second.second << endl;
-}
-
-string make_token(int i){
-  if (i == 1 || i == 3 || i == 6)
-    return "inteiro";
-  else if (i == 8)
-    return "literal";
+    return "Literal";
   else if (i == 9)
     return "id";
   else if (i == 11)
-    return "comentario";
+    return "Comentario";
   else if (i == 12)
-    return "eof";
+    return "EOF";
   else if (i == 13 || i == 14 || i == 15 || i == 16)
     return "OPR";
   else if (i == 17)
@@ -228,25 +189,25 @@ string make_token(int i){
     return "FC_P";
   else if (i == 21)
     return "PT_V";
-  else if (i == 22)
+  else
     return "ERRO";
 }
 
-void insertSymbol(string lex, string token) {
-  if (!symbolTable.count(lex)){
+void insertToken(string lex, string token) {
+  if (!symbolTable.count(lex)) {
     symbolTable[lex] = make_pair(token, "");
     bufferLex.first = lex;
     bufferLex.second.first = token;
+    bufferLex.second.second = "";
+    cout << "Criando: " << bufferLex.second.first << ":" << bufferLex.first << endl;
   }
-  else if (lex == "inteiro" || lex == "literal" || lex == "real"){
+  else if (lex == "inteiro" || lex == "literal" || lex == "real") {
     symbolTable[bufferLex.first] = make_pair(bufferLex.second.first, lex);
+    bufferLex.second.second = lex;
+    cout << "Acrescentando tipo:  " << bufferLex.second.second << " em " <<
+    bufferLex.second.first << ":" << bufferLex.first << endl;
   }
-  else{
-    //Imprimir linha do token;
+  else {
+    cout << "Existente: " << token << ":" << lex << endl;
   }
 }
-
-
-
-
-
