@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
       nextState = sigma[state][charClass];
       if (nextState < 0) {
         insertToken(lex, make_token(nextState));
-        cout << argv[0] << ":" << line << ":" << col << "erro: ";
+        cout << argv[0] << ":" << line << ":" << col << " erro: ";
         showError(nextState);
         exit(EXIT_FAILURE);
       }
@@ -145,7 +145,7 @@ void showError(int code) {
   if (code == -6) cout << "esperado tokens '+', '-' ou 'Num' (digito) depois do 'E'" << endl;
   if (code == -7) cout << "esperado um token 'Num' (digito)" << endl;
   if (code == -8) cout << "esperado um token '\"' para fechar o ultimo token '\"'" << endl;
-  if (code == -9) cout << "esperado um token '}' para fechar o ultimo '{'" << endl;
+  if (code == -9) cout << "esperado um token '}' para fechar o ultimo token '{'" << endl;
 }
 
 string make_token(int i) {
