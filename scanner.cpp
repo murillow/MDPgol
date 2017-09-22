@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
       if (nextState < 0) {
         lex.push_back(symbol);
         insertToken(lex, make_token(nextState));
-        cout << argv[0] << ":" << line << col << " erro: ";
+        cout << argv[0] << ":" << line << ":" << col << " erro: ";
         showError(nextState);
         exit(EXIT_FAILURE);
       }
