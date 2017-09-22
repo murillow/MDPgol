@@ -65,21 +65,25 @@ int main(int argc, char *argv[]) {
   ifstream source("texto.alg");
 
   if (source.is_open()) {
-    while (source.get(symbol) || source.eof()) {
-      col++;
-      if (symbol == '\n') {
+    bool read = true;
+    while (true) {
+      if (symbol == '\n' && read) {
         line++;
         col = 0;
       }
       if (source.eof()) {
         symbol = EOF;
+      } else if (read) {
+        source.get(symbol);
         col++;
       }
+      read = true;
       charClass = symbolToCharClass(symbol);
       nextState = sigma[state][charClass];
       if (nextState < 0) {
+        lex.push_back(symbol);
         insertToken(lex, make_token(nextState));
-        cout << argv[0] << ":" << line << ":" << col << " erro: ";
+        cout << argv[0] << ":" << line << col << " erro: ";
         showError(nextState);
         exit(EXIT_FAILURE);
       }
@@ -90,8 +94,7 @@ int main(int argc, char *argv[]) {
         if (lex.size() >= 1 && lex != "{") {
           insertToken(lex, make_token(state));
           lex.clear();
-          source.seekg(-1, source.cur);
-          col--;
+          read = false;
         }
       }
       if (symbol == EOF) break;
