@@ -32,82 +32,61 @@ int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 /*21*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-// map <Lexema, Token, Atributo>
+// The symbol table: map <Token, Lexema, Atributo>
 map <string, pair <string, string> > symbolTable;
+string lex;
+int line = 1;
+int col = 1;
+int state;
+int lastState;
+FILE *fd, *fopen();
 
-// String auxiliar para guardar o ultimo lexema;
-pair <string, pair <string, string> > bufferLex;
+int symbol_to_charClass (char);
+void show_error (int);
+string make_token (int);
+void make_token_attr (string,  string);
+pair <string, pair <string, string> > scanner (void);
 
-int       symbolToCharClass   (char);
-void      showError           (int);
-string    make_token          (int);
-void      insertToken         (string,  string);
-
-int main(int argc, char *argv[]) {
-  string lex;
-  int col = 0, line = 1;
-  char symbol;
-  int charClass, nextState, state = 0;
-
-  symbolTable["inicio"]     = make_pair("inicio", "");
-  symbolTable["varinicio"]  = make_pair("varinicio", "");
-  symbolTable["varfim"]     = make_pair("varfim", "");
-  symbolTable["escreva"]    = make_pair("escreva", "");
-  symbolTable["leia"]       = make_pair("leia", "");
-  symbolTable["se"]         = make_pair("se", "");
-  symbolTable["entao"]      = make_pair("entao", "");
-  symbolTable["fimse"]      = make_pair("fimse", "");
-  symbolTable["fim"]        = make_pair("fim", "");
-  symbolTable["inteiro"]    = make_pair("inteiro", "");
-  symbolTable["literal"]    = make_pair("literal", "");
-  symbolTable["real"]       = make_pair("real", "");
-
-  ifstream source("texto.alg");
-
-  if (source.is_open()) {
-    bool read = true;
-    while (true) {
-      if (symbol == '\n' && read) {
-        line++;
-        col = 0;
-      }
-      if (source.eof()) {
-        symbol = EOF;
-      } else if (read) {
-        source.get(symbol);
-        col++;
-      }
-      read = true;
-      charClass = symbolToCharClass(symbol);
-      nextState = sigma[state][charClass];
-      if (nextState < 0) {
-        lex.push_back(symbol);
-        insertToken(lex, make_token(nextState));
-        cout << argv[0] << ":" << line << ":" << col << " erro: ";
-        showError(nextState);
+pair <string, pair <string, string> > scanner () {
+  pair <string, pair <string, string> > token;  
+  char nextChar;
+  int charClass;
+  nextChar = getc(fd);
+  col++;  
+  if (nextChar == '\n') {
+    line++;
+    col = 1;
+  }
+  charClass = symbol_to_charClass(nextChar);
+  state = sigma[state][charClass];
+  if (state < 0) {
+    printf("texto.alg:%d:%d erro: ", line, col);
+    show_error(state);
+    exit(EXIT_FAILURE);
+  } else if (state > 0) {
+    lex.push_back(nextChar);
+    lastState = state;
+  } else {
+    if (lex.size() >= 1) {
+      token = make_pair(make_token(lastState), make_pair(lex, ""));
+      cout << token.first << ":" << token.second.first << endl;
+      lex.clear();
+      if (sigma[state][charClass] > 0) {
+        state = sigma[state][charClass];
+        lex.push_back(nextChar);
+        lastState = state;
+      } else if (sigma[state][charClass] < 0) {
+        state = sigma[state][charClass];        
+        printf("texto.alg:%d:%d erro: ", line, col);
+        show_error(state);
         exit(EXIT_FAILURE);
       }
-      else if (nextState > 0 && (state != 10 || nextState != 10)) {
-        lex.push_back(symbol);
-      }
-      else { //nextstate == 0
-        if (lex.size() >= 1 && lex != "{") {
-          insertToken(lex, make_token(state));
-          lex.clear();
-          read = false;
-        }
-      }
-      if (symbol == EOF) break;
-      state = nextState;
+      return token;    
     }
   }
-  else {
-    cout << "Programa fonte nao encontrado!\n";
-  }
-  return 0;
 }
 
-int symbolToCharClass(char c) {
+int symbol_to_charClass(char c) {
   if (c == '\t') {
     return 0;
   } else if (c == '\n') {
@@ -139,7 +118,7 @@ int symbolToCharClass(char c) {
   }
 }
 
-void showError(int code) {
+void show_error(int code) {
   if (code == -1) cout << "token iniciado por '.'" << endl;
   if (code == -2) cout << "token iniciado por '_'" << endl;
   if (code == -3) cout << "token '}' sem um token '{' anterior" << endl;
@@ -151,7 +130,7 @@ void showError(int code) {
   if (code == -9) cout << "esperado um token '}' para fechar o ultimo token '{'" << endl;
 }
 
-string make_token(int i) {
+inline string make_token(int i) {
   if (i == 1 || i == 3 || i == 6) {
     return "Num";
   } else if (i == 8) {
@@ -179,21 +158,47 @@ string make_token(int i) {
   }
 }
 
-void insertToken(string lex, string token) {
-  if (!symbolTable.count(lex)) {
-    symbolTable[lex] = make_pair(token, "");
-    bufferLex.first = lex;
-    bufferLex.second.first = token;
-    bufferLex.second.second = "";
-    cout << "Criando: " << bufferLex.second.first << ":" << bufferLex.first << endl;
+//void make_token_attr(string lex, string token) {
+//  if (!symbolTable.count(lex)) {
+//    symbolTable[lex] = make_pair(token, "");
+//    bufferLex.first = lex;
+//    bufferLex.second.first = token;
+//    bufferLex.second.second = "";
+//    cout << "Criando: " << bufferLex.second.first << ":" << bufferLex.first << endl;
+//  } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
+//    symbolTable[bufferLex.first] = make_pair(bufferLex.second.first, lex);
+//    bufferLex.second.second = lex;
+//    cout << "Acrescentando tipo:  " << bufferLex.second.second << " em " <<
+//    bufferLex.second.first << ":" << bufferLex.first << endl;
+//  } else {
+//    cout << "Existente: " << token << ":" << lex << endl;
+//  }
+//}
+
+int main(int argc, char **argv) {
+  // Token: <Token, Lexema, Atributo>
+  pair <string, pair <string, string> > token;
+
+  symbolTable["inicio"]     = make_pair("inicio", "");
+  symbolTable["varinicio"]  = make_pair("varinicio", "");
+  symbolTable["varfim"]     = make_pair("varfim", "");
+  symbolTable["escreva"]    = make_pair("escreva", "");
+  symbolTable["leia"]       = make_pair("leia", "");
+  symbolTable["se"]         = make_pair("se", "");
+  symbolTable["entao"]      = make_pair("entao", "");
+  symbolTable["fimse"]      = make_pair("fimse", "");
+  symbolTable["fim"]        = make_pair("fim", "");
+  symbolTable["inteiro"]    = make_pair("inteiro", "");
+  symbolTable["literal"]    = make_pair("literal", "");
+  symbolTable["real"]       = make_pair("real", "");
+
+  if ((fd = fopen("texto.alg", "r")) == NULL) {
+    cout << "Erro na abertura do arquivo fonte!\n";
+  } else {
+    do {
+      token = scanner();
+    } while (token.first != "EOF");
   }
-  else if (lex == "inteiro" || lex == "literal" || lex == "real") {
-    symbolTable[bufferLex.first] = make_pair(bufferLex.second.first, lex);
-    bufferLex.second.second = lex;
-    cout << "Acrescentando tipo:  " << bufferLex.second.second << " em " <<
-    bufferLex.second.first << ":" << bufferLex.first << endl;
-  }
-  else {
-    cout << "Existente: " << token << ":" << lex << endl;
-  }
+
+  return 0;
 }
