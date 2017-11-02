@@ -33,8 +33,10 @@ int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 };
 
 /* Variaveis globais */
-map <string, pair <string, string> > symbol_table; // <Token, Lexema, Atributo>
+map <string, pair <string, string> > symbol_table; // <Lexema, Token, Atributo>
 string lex;
+string lastLex;
+string token;
 int line = 1;
 int col = 1;
 int state;
@@ -42,16 +44,17 @@ int lastState;
 FILE *fd, *fopen();
 
 /* Declaracoes de funcoes */
+bool entry_exists(string);
 int symbol_to_charClass (char);
 void show_error (int);
 string make_token (int);
-void make_token_attr (string,  string);
+void make_token_attr (string, string);
 pair <string, pair <string, string> > scanner (void);
 
 /******************************************************************************/
-/* driver principal */
+/* main - driver principal */
 int main(int argc, char **argv) {
-  pair <string, pair <string, string> > token; // <Token, Lexema, Atributo>
+  pair <string, pair <string, string> > token_attr; // <Lexema, Token, Atributo>
 
   symbol_table["inicio"]     = make_pair("inicio", "");
   symbol_table["varinicio"]  = make_pair("varinicio", "");
@@ -70,9 +73,9 @@ int main(int argc, char **argv) {
     cout << "Erro na abertura do arquivo fonte!\n";
   } else {
     do {
-      token = scanner();
-      cout << token.first << ":" << token.second.first << endl;      
-    } while (token.first != "EOF");
+      token_attr = scanner();
+      cout << token_attr.first << ":" << token_attr.second.first << endl;      
+    } while (token_attr.first != "EOF");
   }
 
   return 0;
@@ -80,9 +83,9 @@ int main(int argc, char **argv) {
 
 /******************************************************************************/
 /* scanner - funcao que realiza a analise lexica de programas MDPgol e retorna o
-             a tupla <token, lexema, atributo> */
+             pair <token, lexema, atributo> */
 pair <string, pair <string, string> > scanner() {
-  pair <string, pair <string, string> > token;  
+  pair <string, pair <string, string> > nextToken;
   char nextChar;
   int charClass;
   nextChar = getc(fd);
@@ -102,8 +105,23 @@ pair <string, pair <string, string> > scanner() {
     lastState = state;
   } else {
     if (lex.size() >= 1) {
-      token = make_pair(make_token(lastState), make_pair(lex, ""));
-      // cout << token.first << ":" << token.second.first << endl;
+      token = make_token(lastState);
+      if (lastState == 9) { // ID
+        if (!entry_exists(lex)) {
+          symbol_table[lex] = make_pair(token, "");
+          lastLex = lex;
+        } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
+          symbol_table[lastLex].second = lex;
+          cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
+        } else {
+          if (symbol_table.count(lex)) {
+            cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
+          } else {
+            cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";          
+          }
+        }
+      }
+      nextToken = make_pair(token, make_pair(lex, ""));
       lex.clear();
       if (sigma[state][charClass] > 0) {
         state = sigma[state][charClass];
@@ -115,11 +133,24 @@ pair <string, pair <string, string> > scanner() {
         show_error(state);
         exit(EXIT_FAILURE);
       }
-      return token;    
+      return nextToken;    
     }
   }
-  token = scanner();
-  return token;
+  nextToken = scanner();
+  return nextToken;
+}
+
+/******************************************************************************/
+/* entry_exists - funcao que verifica se um lexema de token ID se encontra na
+                  tabela de simbolos */
+bool entry_exists(string lex) {
+  map <string, pair <string, string> >::iterator it;
+  for (it = symbol_table.begin(); it != symbol_table.end(); it++) {
+    if (it->first == lex) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /******************************************************************************/
@@ -202,20 +233,3 @@ inline string make_token(int s) {
     return "ERRO";
   }
 }
-
-//void make_token_attr(string lex, string token) {
-//  if (!symbol_table.count(lex)) {
-//    symbol_table[lex] = make_pair(token, "");
-//    bufferLex.first = lex;
-//    bufferLex.second.first = token;
-//    bufferLex.second.second = "";
-//    cout << "Criando: " << bufferLex.second.first << ":" << bufferLex.first << endl;
-//  } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
-//    symbol_table[bufferLex.first] = make_pair(bufferLex.second.first, lex);
-//    bufferLex.second.second = lex;
-//    cout << "Acrescentando tipo:  " << bufferLex.second.second << " em " <<
-//    bufferLex.second.first << ":" << bufferLex.first << endl;
-//  } else {
-//    cout << "Existente: " << token << ":" << lex << endl;
-//  }
-//}
