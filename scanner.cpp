@@ -32,8 +32,8 @@ int sigma[MAX_STATES][MAX_CHAR_CLASSES] = {
 /*21*/  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-// The symbol table: map <Token, Lexema, Atributo>
-map <string, pair <string, string> > symbol_table;
+/* Variaveis globais */
+map <string, pair <string, string> > symbol_table; // <Token, Lexema, Atributo>
 string lex;
 int line = 1;
 int col = 1;
@@ -41,12 +41,46 @@ int state;
 int lastState;
 FILE *fd, *fopen();
 
+/* Declaracoes de funcoes */
 int symbol_to_charClass (char);
 void show_error (int);
 string make_token (int);
 void make_token_attr (string,  string);
 pair <string, pair <string, string> > scanner (void);
 
+/******************************************************************************/
+/* driver principal */
+int main(int argc, char **argv) {
+  pair <string, pair <string, string> > token; // <Token, Lexema, Atributo>
+
+  symbol_table["inicio"]     = make_pair("inicio", "");
+  symbol_table["varinicio"]  = make_pair("varinicio", "");
+  symbol_table["varfim"]     = make_pair("varfim", "");
+  symbol_table["escreva"]    = make_pair("escreva", "");
+  symbol_table["leia"]       = make_pair("leia", "");
+  symbol_table["se"]         = make_pair("se", "");
+  symbol_table["entao"]      = make_pair("entao", "");
+  symbol_table["fimse"]      = make_pair("fimse", "");
+  symbol_table["fim"]        = make_pair("fim", "");
+  symbol_table["inteiro"]    = make_pair("inteiro", "");
+  symbol_table["literal"]    = make_pair("literal", "");
+  symbol_table["real"]       = make_pair("real", "");
+
+  if ((fd = fopen("texto.alg", "r")) == NULL) {
+    cout << "Erro na abertura do arquivo fonte!\n";
+  } else {
+    do {
+      token = scanner();
+      cout << token.first << ":" << token.second.first << endl;      
+    } while (token.first != "EOF");
+  }
+
+  return 0;
+}
+
+/******************************************************************************/
+/* scanner - funcao que realiza a analise lexica de programas MDPgol e retorna o
+             a tupla <token, lexema, atributo> */
 pair <string, pair <string, string> > scanner() {
   pair <string, pair <string, string> > token;  
   char nextChar;
@@ -88,6 +122,9 @@ pair <string, pair <string, string> > scanner() {
   return token;
 }
 
+/******************************************************************************/
+/* symbol_to_charClass - funcao que recebe um caractere da entrada e determina
+                         sua classe de caractere */
 int symbol_to_charClass(char c) {
   if (c == '\t') {
     return 0;
@@ -120,6 +157,9 @@ int symbol_to_charClass(char c) {
   }
 }
 
+/******************************************************************************/
+/* show_error - funcao que indica que o scanner encontrou um lexema fora do
+                padrao especificado */
 void show_error(int code) {
   if (code == -1) cout << "token iniciado por '.'" << endl;
   if (code == -2) cout << "token iniciado por '_'" << endl;
@@ -132,28 +172,31 @@ void show_error(int code) {
   if (code == -9) cout << "esperado um token '}' para fechar o ultimo token '{'" << endl;
 }
 
-inline string make_token(int i) {
-  if (i == 1 || i == 3 || i == 6) {
+/******************************************************************************/
+/* make_token - funcao que recebe um estado de aceitacao e retorna o token
+                representado por esse estado */
+inline string make_token(int s) {
+  if (s == 1 || s == 3 || s == 6) {
     return "Num";
-  } else if (i == 8) {
+  } else if (s == 8) {
     return "Literal";
-  } else if (i == 9) {
+  } else if (s == 9) {
     return "id";
-  } else if (i == 11) {
+  } else if (s == 11) {
     return "Comentario";
-  } else if (i == 12) {
+  } else if (s == 12) {
     return "EOF";
-  } else if (i == 13 || i == 14 || i == 15 || i == 16) {
+  } else if (s == 13 || s == 14 || s == 15 || s == 16) {
     return "OPR";
-  } else if (i == 17) {
+  } else if (s == 17) {
     return "RCB";
-  } else if (i == 18) {
+  } else if (s == 18) {
     return "OPM";
-  } else if (i == 19) {
+  } else if (s == 19) {
     return "AB_P";
-  } else if (i == 20) {
+  } else if (s == 20) {
     return "FC_P";
-  } else if (i == 21) {
+  } else if (s == 21) {
     return "PT_V";
   } else {
     return "ERRO";
@@ -176,32 +219,3 @@ inline string make_token(int i) {
 //    cout << "Existente: " << token << ":" << lex << endl;
 //  }
 //}
-
-int main(int argc, char **argv) {
-  // Token: <Token, Lexema, Atributo>
-  pair <string, pair <string, string> > token;
-
-  symbol_table["inicio"]     = make_pair("inicio", "");
-  symbol_table["varinicio"]  = make_pair("varinicio", "");
-  symbol_table["varfim"]     = make_pair("varfim", "");
-  symbol_table["escreva"]    = make_pair("escreva", "");
-  symbol_table["leia"]       = make_pair("leia", "");
-  symbol_table["se"]         = make_pair("se", "");
-  symbol_table["entao"]      = make_pair("entao", "");
-  symbol_table["fimse"]      = make_pair("fimse", "");
-  symbol_table["fim"]        = make_pair("fim", "");
-  symbol_table["inteiro"]    = make_pair("inteiro", "");
-  symbol_table["literal"]    = make_pair("literal", "");
-  symbol_table["real"]       = make_pair("real", "");
-
-  if ((fd = fopen("texto.alg", "r")) == NULL) {
-    cout << "Erro na abertura do arquivo fonte!\n";
-  } else {
-    do {
-      token = scanner();
-      cout << token.first << ":" << token.second.first << endl;      
-    } while (token.first != "EOF");
-  }
-
-  return 0;
-}
