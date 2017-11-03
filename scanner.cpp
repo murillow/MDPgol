@@ -114,11 +114,7 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lastLex].second = lex;
           cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
         } else {
-          if (symbol_table.count(lex)) {
             cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
-          } else {
-            cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";          
-          }
         }
       }
       nextToken = make_pair(token, make_pair(lex, ""));
