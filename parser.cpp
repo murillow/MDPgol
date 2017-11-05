@@ -54,7 +54,108 @@ pair <string, pair <string, string> > scanner (void);
 /******************************************************************************/
 /* main - driver principal */
 int main(int argc, char **argv) {
-  pair <string, pair <string, string> > token_attr; // <Lexema, Token, Atributo>
+  map <pair <string, string>, string> action; // <<s, a>, Action>
+  map <pair <string, string>, int> transition; // <<s, a>, Transition>
+  map <int, int> rhs_rule_size; // |Beta|
+  map <int, string> rule_to_lhs; // <Num_Regra, LHS>
+  map <int, string> Beta; // A -> Beta
+  pair <string, pair <string, string> > terminal; // <Lexema, Token, Atributo>
+  string s, t, A, B;
+  stack <string> parser_stack;
+  pair <string, string> s_a, t_a;
+
+  rule_to_lhs[1] = "P'";
+  rule_to_lhs[2] = "P";
+  rule_to_lhs[3] = "V";  
+  rule_to_lhs[4] = "LV";
+  rule_to_lhs[5] = "LV";
+  rule_to_lhs[6] = "D";
+  rule_to_lhs[7] = "TIPO";
+  rule_to_lhs[8] = "TIPO";
+  rule_to_lhs[9] = "TIPO";
+  rule_to_lhs[10] = "A";
+  rule_to_lhs[11] = "ES";
+  rule_to_lhs[12] = "ES";
+  rule_to_lhs[13] = "ARG";
+  rule_to_lhs[14] = "ARG";
+  rule_to_lhs[15] = "ARG";
+  rule_to_lhs[16] = "A";
+  rule_to_lhs[17] = "CMD";
+  rule_to_lhs[18] = "LD";
+  rule_to_lhs[19] = "LD";
+  rule_to_lhs[20] = "OPRD";
+  rule_to_lhs[21] = "OPRD";
+  rule_to_lhs[22] = "A";
+  rule_to_lhs[23] = "COND";
+  rule_to_lhs[24] = "CABECALHO";
+  rule_to_lhs[25] = "EXP_R";
+  rule_to_lhs[26] = "CORPO";
+  rule_to_lhs[27] = "CORPO";
+  rule_to_lhs[28] = "CORPO";
+  rule_to_lhs[29] = "CORPO";
+  rule_to_lhs[30] = "A";  
+
+  Beta[1] = "P";
+  Beta[2] = "inicio V A";
+  Beta[3] = "varinicio LV";  
+  Beta[4] = "D LV";
+  Beta[5] = "varfim;";
+  Beta[6] = "id TIPO;";
+  Beta[7] = "int";
+  Beta[8] = "real";
+  Beta[9] = "lit";
+  Beta[10] = "ES A";
+  Beta[11] = "leia id;";
+  Beta[12] = "escreva ARG;";
+  Beta[13] = "literal";
+  Beta[14] = "num";
+  Beta[15] = "id";
+  Beta[16] = "CMD A";
+  Beta[17] = "id rcb LD;";
+  Beta[18] = "OPRD opm OPRD";
+  Beta[19] = "OPRD";
+  Beta[20] = "id";
+  Beta[21] = "num";
+  Beta[22] = "COND A";
+  Beta[23] = "CABECALHO CORPO";
+  Beta[24] = "se (EXP_R) entao";
+  Beta[25] = "OPRD opr OPRD";
+  Beta[26] = "ES CORPO";
+  Beta[27] = "CMD CORPO";
+  Beta[28] = "COND CORPO";
+  Beta[29] = "fimse";
+  Beta[30] = "fim"; 
+  
+  rhs_rule_size[1] = 1;  
+  rhs_rule_size[2] = 3;
+  rhs_rule_size[3] = 2;
+  rhs_rule_size[4] = 2;
+  rhs_rule_size[5] = 2;
+  rhs_rule_size[6] = 3;
+  rhs_rule_size[7] = 1;
+  rhs_rule_size[8] = 1;
+  rhs_rule_size[9] = 1;
+  rhs_rule_size[10] = 2;
+  rhs_rule_size[11] = 3;
+  rhs_rule_size[12] = 3;
+  rhs_rule_size[13] = 1;
+  rhs_rule_size[14] = 1;
+  rhs_rule_size[15] = 1;
+  rhs_rule_size[16] = 2;
+  rhs_rule_size[17] = 4;
+  rhs_rule_size[18] = 3;
+  rhs_rule_size[19] = 1;
+  rhs_rule_size[20] = 1;
+  rhs_rule_size[21] = 1;
+  rhs_rule_size[22] = 2;
+  rhs_rule_size[23] = 2;
+  rhs_rule_size[24] = 5;
+  rhs_rule_size[25] = 3;
+  rhs_rule_size[26] = 2;
+  rhs_rule_size[27] = 2;
+  rhs_rule_size[28] = 2;
+  rhs_rule_size[29] = 1;
+  rhs_rule_size[30] = 1;
 
   symbol_table["inicio"]     = make_pair("inicio", "");
   symbol_table["varinicio"]  = make_pair("varinicio", "");
@@ -69,13 +170,36 @@ int main(int argc, char **argv) {
   symbol_table["literal"]    = make_pair("literal", "");
   symbol_table["real"]       = make_pair("real", "");
 
+  parser_stack.push("0");  
+
   if ((fd = fopen("texto.alg", "r")) == NULL) {
-    cout << "Erro na abertura do arquivo fonte!\n";
+    cout << "Erro na abertura do programa fonte!\n";
   } else {
     do {
-      token_attr = scanner();
-      cout << token_attr.first << ":" << token_attr.second.first << endl;      
-    } while (token_attr.first != "EOF");
+      terminal = scanner();
+      s = parser_stack.top();
+      s_a = make_pair(s, terminal.second.first);
+      if (action[s_a][0] == 'S') {
+        t = action[s_a][1];
+        parser_stack.push(t);
+      } else if (action[s_a][0] == 'R') {
+        for (int i = 0; i < rhs_rule_size[action[s_a][1] - '0']; i++) {
+          parser_stack.pop();
+        }
+        t = parser_stack.top();
+        A = rule_to_lhs[action[s_a][1] - '0'];
+        parser_stack.push(A);
+        t_a = make_pair(t, A);
+        B = transition[t_a];
+        parser_stack.push(B);
+        cout << A << " -> " << Beta[action[s_a][1]] << endl;
+      } else if (action[s_a][0] == 'A') {
+        return 0;
+      } else {
+        // erro();
+      }
+      // cout << terminal.first << ":" << terminal.second.first << endl;      
+    } while (terminal.first != "EOF");
   }
 
   return 0;
