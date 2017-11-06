@@ -7,7 +7,7 @@ using namespace std;
 #define ACTION_MAX_STATES 59
 #define ACTION_MAX_TERMINALS 21
 #define TRANSITION_MAX_STATES 59
-#define TRANSITION_MAX_NON_TERMINALS 14
+#define TRANSITION_MAX_NON_TERMINALS 15
 
 int sigma[SIGMA_MAX_STATES][SIGMA_MAX_CHAR_CLASSES] = {
 ////// 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
@@ -37,9 +37,127 @@ int sigma[SIGMA_MAX_STATES][SIGMA_MAX_CHAR_CLASSES] = {
 };
 
 string action[ACTION_MAX_STATES][ACTION_MAX_TERMINALS] = {
+  "S2", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "E0", "",
+  "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "E1", "A",
+  "E2", "S4", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "E2", "", 
+  "E3", "E3", "E3", "S12", "E3", "E3", "E3", "E3", "S10", "S11", "E3", "E3", "E3", "S14", "E3", "E3", "S9", "E3", "E3", "E3", "",
+  "E10", "E10", "S17", "S18", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "",
+  "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2!", "R2",
+  "E3", "E3", "E3", "S12", "E3", "E3", "E3", "E3", "S10", "S11", "E3", "E3", "E3", "S14", "E3", "E3", "S9", "E3", "E3", "E3", "",
+  "E3", "E3", "E3", "S12", "E3", "E3", "E3", "E3", "S10", "S11", "E3", "E3", "E3", "S14", "E3", "E3", "S9", "E3", "E3", "E3", "",
+  "E3", "E3", "E3", "S12", "E3", "E3", "E3", "E3", "S10", "S11", "E3", "E3", "E3", "S14", "E3", "E3", "S9", "E3", "E3", "E3", "",
+  "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30!", "R30",
+  "E5", "E5", "E5", "S22", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "E5", "",
+  "E6", "E6", "E6", "S26", "S25", "E6", "E6", "S24", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "E6", "",
+  "E7", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "S27", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "E7", "",
+  "E8", "E8", "E8", "S12", "E8", "E8", "E8", "E8", "S10", "S11", "E8", "E8", "E8", "S14", "E8", "S32", "E8", "E8", "E8", "E8", "",
+  "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "E9", "S33", "E9", "E9", "",
+  "R3!", "R3!", "R3!", "R3", "R3!", "R3!", "R3!", "R3!", "R3", "R3", "R3!", "R3!", "R3!", "R3", "R3!", "R3!", "R3", "R3!", "R3!", "R3!", "",
+  "E10", "E10", "S17", "S18", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "E10", "",
+  "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "S35", "",
+  "E12", "E12", "E12", "E12", "E12", "S37", "S38", "S39", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "E12", "",
+  "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10!", "R10",
+  "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16!", "R16",
+  "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22!", "R22",
+  "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "S40", "",
+  "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "S41", "",
+  "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13!", "R13", "",
+  "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14!", "R14", "",
+  "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15!", "R15", "",
+  "E13", "E13", "E13", "S44", "S45", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "",
+  "R23!", "R23!", "R23!", "R23", "R23!", "R23!", "R23!", "R23!", "R23", "R23", "R23!", "R23!", "R23!", "R23", "R23!", "R23", "R23", "R23!", "R23!", "R23!", "",
+  "E8", "E8", "E8", "S12", "E8", "E8", "E8", "E8", "S10", "S11", "E8", "E8", "E8", "S14", "E8", "S32", "E8", "E8", "E8", "E8", "",
+  "E8", "E8", "E8", "S12", "E8", "E8", "E8", "E8", "S10", "S11", "E8", "E8", "E8", "S14", "E8", "S32", "E8", "E8", "E8", "E8", "",
+  "E8", "E8", "E8", "S12", "E8", "E8", "E8", "E8", "S10", "S11", "E8", "E8", "E8", "S14", "E8", "S32", "E8", "E8", "E8", "E8", "",
+  "R29!", "R29!", "R29!", "R29", "R29!", "R29!", "R29!", "R29!", "R29", "R29", "R29!", "R29!", "R29!", "R29", "R29!", "R29", "R29", "R29!", "R29!", "R29!", "",
+  "E13", "E13", "E13", "S44", "S45", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "",
+  "R4!", "R4!", "R4!", "R4", "R4!", "R4!", "R4!", "R4!", "R4", "R4", "R4!", "R4!", "R4!", "R4", "R4!", "R4!", "R4", "R4!", "R4!", "R4!", "",
+  "R5!", "R5!", "R5!", "R5", "R5!", "R5!", "R5!", "R5!", "R5", "R5", "R5!", "R5!", "R5!", "R5", "R5!", "R5!", "R5", "R5!", "R5!", "R5!", "",
+  "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "S51", "",
+  "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7!", "R7", "",
+  "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8!", "R8", "",
+  "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9!", "R9", "",
+  "R11!", "R11!", "R11!", "R11", "R11!", "R11!", "R11!", "R11!", "R11", "R11", "R11!", "R11!", "R11!", "R11", "R11!", "R11", "R11", "R11!", "R11!", "R11!", "",
+  "R12!", "R12!", "R12!", "R12", "R12!", "R12!", "R12!", "R12!", "R12", "R12", "R12!", "R12!", "R12!", "R12", "R12!", "R12", "R12", "R12!", "R12!", "R12!", "",
+  "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "E11", "S52", "",
+  "E14", "E14", "E14", "E14", "E14", "E14", "E14", "E14", "E14", "E14", "E14", "S53", "E14", "E14", "E14", "E14", "E14", "E14", "E14", "R19", "",
+  "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20!", "R20", "R20", "R20!", "R20!", "R20!", "R20!", "R20!", "R20", "R20", "",
+  "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21!", "R21", "R21", "R21!", "R21!", "R21!", "R21!", "R21!", "R21", "R21", "",
+  "R26!", "R26!", "R26!", "R26", "R26!", "R26!", "R26!", "R26!", "R26", "R26", "R26!", "R26!", "R26!", "R26", "R26!", "R26", "R26", "R26!", "R26!", "R26!", "",
+  "R27!", "R27!", "R27!", "R27", "R27!", "R27!", "R27!", "R27!", "R27", "R27", "R27!", "R27!", "R27!", "R27", "R27!", "R27", "R27", "R27!", "R27!", "R27!", "",
+  "R28!", "R28!", "R28!", "R28", "R28!", "R28!", "R28!", "R28!", "R28", "R28", "R28!", "R28!", "R28!", "R28", "R28!", "R28", "R28", "R28!", "R28!", "R28!", "",
+  "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "E4", "S54", "E4", "",
+  "E15", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "S55", "E15", "E15", "E15", "E15", "E15", "E15", "E15", "",
+  "R6!", "R6!", "R6", "R6", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "R6!", "",
+  "R17!", "R17!", "R17!", "R17", "R17!", "R17!", "R17!", "R17!", "R17", "R17", "R17!", "R17!", "R17!", "R17", "R17!", "R17", "R17", "R17!", "R17!", "R17!", "",
+  "E13", "E13", "E13", "S44", "S45", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "",
+  "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "E16", "S57", "E16", "E16", "E16", "E16", "E16", "",
+  "E13", "E13", "E13", "S44", "S45", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "E13", "",
+  "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18!", "R18", "",
+  "R24!", "R24!", "R24!", "R24", "R24!", "R24!", "R24!", "R24!", "R24", "R24", "R24!", "R24!", "R24!", "R24", "R24!", "R24", "R24!", "R24!", "R24!", "R24!", "",
+  "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25!", "R25", "R25!", ""
 };
 
 string transition[TRANSITION_MAX_STATES][TRANSITION_MAX_NON_TERMINALS] = {
+  "1", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "3", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "5", "6", "7", "8", "13", "", "", "", "", "",
+  "", "", "15", "16", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "19", "6", "7", "8", "13", "", "", "", "", "",
+  "", "", "", "", "", "20", "6", "7", "8", "13", "", "", "", "", "",
+  "", "", "", "", "", "21", "6", "7", "8", "13", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "23", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "29", "30", "31", "13", "", "", "", "", "28",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "34", "16", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "36", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "42", "43", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "29", "30", "31", "13", "", "", "", "", "46",
+  "", "", "", "", "", "", "29", "30", "31", "13", "", "", "", "", "47",
+  "", "", "", "", "", "", "29", "30", "31", "13", "", "", "", "", "48",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "50", "49", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "56", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "58", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
 /* Variaveis globais */
@@ -55,10 +173,11 @@ FILE *fd, *fopen();
 
 /* Declaracoes de funcoes */
 bool entry_exists(string);
-int symbol_to_charClass (char);
-void show_error (int);
-string make_token (int);
-void make_token_attr (string, string);
+int symbol_to_charClass(char);
+void error_lexical(int);
+void error_syntatic(string);
+string make_token(int);
+void make_token_attr(string, string);
 pair <string, pair <string, string> > scanner (void);
 int token_to_code(string);
 int nt_to_code(string);
@@ -68,12 +187,11 @@ int nt_to_code(string);
 int main(int argc, char **argv) {
   map <int, int> rhs_size; // |Beta|
   map <int, string> lhs; // <Num_Regra, LHS>
-  map <int, string> Beta; // Num_Regra -> Beta
+  map <int, string> Beta; // <Num_Regra, Beta>
   pair <string, pair <string, string> > terminal; // <Lexema, Token, Atributo>
   int a, s;
   string t;
   stack <string> parser_stack;
-  pair <string, string> state_terminal;
 
   lhs[1] = "P'";
   lhs[2] = "P";
@@ -188,32 +306,35 @@ int main(int argc, char **argv) {
   } else {
     do {
       terminal = scanner();
+      cout << terminal.first << ":" << terminal.second.first << endl;            
       s = atoi(parser_stack.top().c_str());
-      a = token_to_code(terminal.second.first);
+      a = token_to_code(terminal.first);
+      cout << s << ":" << a << ":" << terminal.first << ":" << action[s][a] << endl;      
       if (action[s][a][0] == 'S') {
         t = action[s][a].substr(1, 2);
-        parser_stack.push(terminal.second.first);
+        parser_stack.push(terminal.first);
         parser_stack.push(t);
       } else if (action[s][a][0] == 'R') {
         int rule = atoi((action[s][a].substr(1, 2)).c_str());
-        for (int i = 0; i < rhs_size[rule]; i++) {
+        for (int i = 1; i <= 2 * rhs_size[rule]; i++) {
           parser_stack.pop();
         }
         t = parser_stack.top();
         string A = lhs[rule];
         parser_stack.push(A);
         int u = atoi(t.c_str());
-        int nt = token_to_code(A);
+        int nt = nt_to_code(A);
         string new_state = transition[u][nt];
         parser_stack.push(new_state);
         cout << A << " -> " << Beta[rule] << endl;
       } else if (action[s][a][0] == 'A') {
+        cout << "Acc" << endl;
         return 0;
       } else {
-        // erro();
+        // printf("%d,%d\n", s, a);
+        //error_syntatic(action[s][a]);
       }
-      // cout << terminal.first << ":" << terminal.second.first << endl;      
-    } while (terminal.first != "EOF");
+    } while (terminal.first != "$");
   }
 
   return 0;
@@ -236,7 +357,7 @@ pair <string, pair <string, string> > scanner() {
   state = sigma[state][charClass];
   if (state < 0) {
     printf("texto.alg:%d:%d erro: ", line, col);
-    show_error(state);
+    error_lexical(state);
     exit(EXIT_FAILURE);
   } else if (state > 0) {
     lex.push_back(nextChar);
@@ -249,10 +370,12 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lex] = make_pair(token, "");
           lastLex = lex;
         } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
+          if (symbol_table[lex].first == lex) token = lex;          
           symbol_table[lastLex].second = lex;
-          cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
+          // cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
         } else {
-          cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
+          if (symbol_table[lex].first == lex) token = lex;
+          // cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
         }
       }
       nextToken = make_pair(token, make_pair(lex, ""));
@@ -264,7 +387,7 @@ pair <string, pair <string, string> > scanner() {
       } else if (sigma[state][charClass] < 0) {
         state = sigma[state][charClass];        
         printf("texto.alg:%d:%d erro: ", line, col);
-        show_error(state);
+        error_lexical(state);
         exit(EXIT_FAILURE);
       }
       return nextToken;    
@@ -275,8 +398,8 @@ pair <string, pair <string, string> > scanner() {
 }
 
 /******************************************************************************/
-/* entry_exists - funcao que verifica se um lexema de token ID se encontra na
-                  tabela de simbolos */
+/* entry_exists - funcao que verifica se um lexema com o mesmo nome de um token
+                  id se encontra na tabela de simbolos */
 bool entry_exists(string lex) {
   map <string, pair <string, string> >::iterator it;
   for (it = symbol_table.begin(); it != symbol_table.end(); it++) {
@@ -328,38 +451,52 @@ int symbol_to_charClass(char c) {
 int token_to_code(string t) {
   if (t == "inicio") return 0;
   if (t == "varinicio") return 1;
-  if (t == "inicio") return 2;
-  if (t == "inicio") return 3;
-  if (t == "inicio") return 4;
-  if (t == "inicio") return 5;
-  if (t == "inicio") return 6;
-  if (t == "inicio") return 7;
-  if (t == "inicio") return 8;
-  if (t == "inicio") return 9;
-  if (t == "inicio") return 10;
-  if (t == "inicio") return 11;
-  if (t == "inicio") return 12;
-  if (t == "inicio") return 13;
-  if (t == "inicio") return 14;
-  if (t == "inicio") return 15;
-  if (t == "inicio") return 16;
-  if (t == "inicio") return 17;
-  if (t == "inicio") return 18;
-  if (t == "inicio") return 19;
+  if (t == "varfim") return 2;
+  if (t == "id") return 3;
+  if (t == "num") return 4;
+  if (t == "inteiro") return 5;
+  if (t == "real") return 6;
+  if (t == "literal") return 7;
+  if (t == "leia") return 8;
+  if (t == "escreva") return 9;
+  if (t == "rcb") return 10;
+  if (t == "opm") return 11;
+  if (t == "opr") return 12;
+  if (t == "se") return 13;
+  if (t == "então") return 14;
+  if (t == "fimse") return 15;
+  if (t == "fim") return 16;
+  if (t == "(") return 17;
+  if (t == ")") return 18;
+  if (t == ";") return 19;
   else return 20;
 }
 
 /******************************************************************************/
 /* nt_to_code - funcao que recebe um nao-terminal da gramatica do MDPgol e 
                 retorna seu codigo interno */
-int nt_to_code(string n) {
-  return 0;
+int nt_to_code(string nt) {
+  if (nt == "P") return 0;
+  if (nt == "V") return 1;
+  if (nt == "LV") return 2;
+  if (nt == "D") return 3;
+  if (nt == "TIPO") return 4;
+  if (nt == "A") return 5;
+  if (nt == "ES") return 6;
+  if (nt == "CMD") return 7;
+  if (nt == "COND") return 8;
+  if (nt == "CABECALHO") return 9;
+  if (nt == "ARG") return 10;
+  if (nt == "LD") return 11;
+  if (nt == "OPRD") return 12;
+  if (nt == "EXP_R") return 13;
+  else return 14;
 }                
 
 /******************************************************************************/
-/* show_error - funcao que indica que o scanner encontrou um lexema fora do
+/* error_lexical - funcao que indica que o scanner encontrou um lexema fora do
                 padrao especificado */
-void show_error(int code) {
+void error_lexical(int code) {
   if (code == -1) cout << "token iniciado por '.'" << endl;
   if (code == -2) cout << "token iniciado por '_'" << endl;
   if (code == -3) cout << "token '}' sem um token '{' anterior" << endl;
@@ -372,32 +509,56 @@ void show_error(int code) {
 }
 
 /******************************************************************************/
+/* error_lexical - funcao que indica que o scanner encontrou um lexema fora do
+                padrao especificado */
+void error_syntatic(string E) {
+  printf("texto.alg:%d:%d erro: ", line, col);
+  if (E == "E0") cout << "inicio nao encontrado" << endl;
+  if (E == "E1") cout << "estrutura incompleta - esperado fim de sentenca" << endl;
+  if (E == "E2") cout << "varinicio nao encontrado" << endl;
+  if (E == "E3") cout << "erro no bloco de comandos" << endl;
+  if (E == "E4") cout << "estrutura incompleta - esperado fecha parenteses" << endl;
+  if (E == "E5") cout << "estrutura incompleta - esperado id" << endl;
+  if (E == "E6") cout << "estrutura incompleta - esperado id, numero ou literal" << endl;
+  if (E == "E7") cout << "estrutura incompleta - esperado operador de atribuicao" << endl;
+  if (E == "E8") cout << "erro no bloco do entao" << endl;
+  if (E == "E9") cout << "estrutura incompleta - esperado abre parênteses" << endl;
+  if (E == "E10") cout << "estrutura incompleta - esperado id ou varfim" << endl;
+  if (E == "E11") cout << "estrutura incompleta - esperado ponto e vírgula" << endl;
+  if (E == "E12") cout << "estrutura incompleta - esperado um tipo" << endl;
+  if (E == "E13") cout << "estrutura incompleta - esperado id ou número" << endl;
+  if (E == "E14") cout << "estrutura incompleta - esperado ponto e vírgula ou operador aritmético" << endl;
+  if (E == "E15") cout << "estrutura incompleta - esperado operador relacional" << endl;
+  if (E == "E16") cout << "estrutura incompleta - esperado entao" << endl;
+}
+
+/******************************************************************************/
 /* make_token - funcao que recebe um estado de aceitacao e retorna o token
                 representado por esse estado */
 inline string make_token(int s) {
   if (s == 1 || s == 3 || s == 6) {
-    return "Num";
+    return "num";
   } else if (s == 8) {
-    return "Literal";
+    return "literal";
   } else if (s == 9) {
     return "id";
   } else if (s == 11) {
-    return "Comentario";
+    return "comentario";
   } else if (s == 12) {
-    return "EOF";
+    return "$";
   } else if (s == 13 || s == 14 || s == 15 || s == 16) {
-    return "OPR";
+    return "opr";
   } else if (s == 17) {
-    return "RCB";
+    return "rcb";
   } else if (s == 18) {
-    return "OPM";
+    return "opm";
   } else if (s == 19) {
-    return "AB_P";
+    return "(";
   } else if (s == 20) {
-    return "FC_P";
+    return ")";
   } else if (s == 21) {
-    return "PT_V";
+    return ";";
   } else {
-    return "ERRO";
+    return "erro";
   }
 }
