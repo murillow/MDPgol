@@ -304,16 +304,16 @@ int main(int argc, char **argv) {
   if ((fd = fopen("texto.alg", "r")) == NULL) {
     cout << "Erro na abertura do programa fonte!\n";
   } else {
+    terminal = scanner();
     do {
-      terminal = scanner();
-      cout << terminal.first << ":" << terminal.second.first << endl;            
       s = atoi(parser_stack.top().c_str());
       a = token_to_code(terminal.first);
-      cout << s << ":" << a << ":" << terminal.first << ":" << action[s][a] << endl;      
       if (action[s][a][0] == 'S') {
         t = action[s][a].substr(1, 2);
         parser_stack.push(terminal.first);
         parser_stack.push(t);
+        terminal = scanner();
+        cout << terminal.first << ":" << terminal.second.first << endl;      
       } else if (action[s][a][0] == 'R') {
         int rule = atoi((action[s][a].substr(1, 2)).c_str());
         for (int i = 1; i <= 2 * rhs_size[rule]; i++) {
@@ -331,10 +331,9 @@ int main(int argc, char **argv) {
         cout << "Acc" << endl;
         return 0;
       } else {
-        // printf("%d,%d\n", s, a);
-        //error_syntatic(action[s][a]);
+        error_syntatic(action[s][a]);
       }
-    } while (terminal.first != "$");
+    } while (true);
   }
 
   return 0;
@@ -372,10 +371,10 @@ pair <string, pair <string, string> > scanner() {
         } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
           if (symbol_table[lex].first == lex) token = lex;          
           symbol_table[lastLex].second = lex;
-          // cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
+          cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
         } else {
           if (symbol_table[lex].first == lex) token = lex;
-          // cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
+          cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
         }
       }
       nextToken = make_pair(token, make_pair(lex, ""));
@@ -463,7 +462,7 @@ int token_to_code(string t) {
   if (t == "opm") return 11;
   if (t == "opr") return 12;
   if (t == "se") return 13;
-  if (t == "então") return 14;
+  if (t == "entao") return 14;
   if (t == "fimse") return 15;
   if (t == "fim") return 16;
   if (t == "(") return 17;
@@ -509,7 +508,7 @@ void error_lexical(int code) {
 }
 
 /******************************************************************************/
-/* error_lexical - funcao que indica que o scanner encontrou um lexema fora do
+/* error_syntatic - funcao que indica que o scanner encontrou um lexema fora do
                 padrao especificado */
 void error_syntatic(string E) {
   printf("texto.alg:%d:%d erro: ", line, col);
@@ -522,14 +521,15 @@ void error_syntatic(string E) {
   if (E == "E6") cout << "estrutura incompleta - esperado id, numero ou literal" << endl;
   if (E == "E7") cout << "estrutura incompleta - esperado operador de atribuicao" << endl;
   if (E == "E8") cout << "erro no bloco do entao" << endl;
-  if (E == "E9") cout << "estrutura incompleta - esperado abre parênteses" << endl;
+  if (E == "E9") cout << "estrutura incompleta - esperado abre parenteses" << endl;
   if (E == "E10") cout << "estrutura incompleta - esperado id ou varfim" << endl;
-  if (E == "E11") cout << "estrutura incompleta - esperado ponto e vírgula" << endl;
+  if (E == "E11") cout << "estrutura incompleta - esperado ponto e virgula" << endl;
   if (E == "E12") cout << "estrutura incompleta - esperado um tipo" << endl;
-  if (E == "E13") cout << "estrutura incompleta - esperado id ou número" << endl;
-  if (E == "E14") cout << "estrutura incompleta - esperado ponto e vírgula ou operador aritmético" << endl;
+  if (E == "E13") cout << "estrutura incompleta - esperado id ou numero" << endl;
+  if (E == "E14") cout << "estrutura incompleta - esperado ponto e virgula ou operador aritmetico" << endl;
   if (E == "E15") cout << "estrutura incompleta - esperado operador relacional" << endl;
   if (E == "E16") cout << "estrutura incompleta - esperado entao" << endl;
+  exit(EXIT_FAILURE);
 }
 
 /******************************************************************************/
