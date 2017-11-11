@@ -172,7 +172,6 @@ int lastState;
 FILE *fd, *fopen();
 
 /* Declaracoes de funcoes */
-bool entry_exists(string);
 int symbol_to_charClass(char);
 void error_lexical(int);
 void error_syntatic(string);
@@ -365,7 +364,7 @@ pair <string, pair <string, string> > scanner() {
     if (lex.size() >= 1) {
       token = make_token(lastState);
       if (lastState == 9) { // ID
-        if (!entry_exists(lex)) {
+        if (symbol_table.find(lex) == symbol_table.end()) {
           symbol_table[lex] = make_pair(token, "");
           lastLex = lex;
         } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
@@ -394,19 +393,6 @@ pair <string, pair <string, string> > scanner() {
   }
   nextToken = scanner();
   return nextToken;
-}
-
-/******************************************************************************/
-/* entry_exists - funcao que verifica se um lexema com o mesmo nome de um token
-                  id se encontra na tabela de simbolos */
-bool entry_exists(string lex) {
-  map <string, pair <string, string> >::iterator it;
-  for (it = symbol_table.begin(); it != symbol_table.end(); it++) {
-    if (it->first == lex) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /******************************************************************************/
