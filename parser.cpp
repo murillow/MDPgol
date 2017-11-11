@@ -368,9 +368,9 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lex] = make_pair(token, "");
           lastLex = lex;
         } else if (lex == "inteiro" || lex == "literal" || lex == "real") {
+          cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";          
           if (symbol_table[lex].first == lex) token = lex;          
           symbol_table[lastLex].second = lex;
-          cout << "inserindo: <" << token << ", " << lastLex << ", " << lex << ">\n";
         } else {
           if (symbol_table[lex].first == lex) token = lex;
           cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
