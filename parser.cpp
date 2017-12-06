@@ -162,7 +162,7 @@ string transition[TRANSITION_MAX_STATES][TRANSITION_MAX_NON_TERMINALS] = {
 
 /* Variaveis globais */
 map <string, pair <string, string> > symbol_table; // <Lexema, Token, Atributo>
-stack <string> parser_stack;
+stack <pair <string, string> > parser_stack;
 string lex;
 string lastLex;
 string token;
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
   map <int, int> rhs_size; // |Beta|
   map <int, string> lhs; // <Num_Regra, LHS>
   map <int, string> Beta; // <Num_Regra, Beta>
-  pair <string, pair <string, string> > terminal; // <Lexema, Token, Atributo>
+  pair <string, pair <string, string> > terminal; // <Token, Lexema, Atributo>
   int a, s;
   string t;
 
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
   symbol_table["literal"]    = make_pair("literal", "");
   symbol_table["real"]       = make_pair("real", "");
 
-  parser_stack.push("0");  
+  parser_stack.push(make_pair("0", ""));  
 
   if ((fd = fopen("texto.alg", "r")) == NULL) {
     cout << "Erro na abertura do programa fonte!\n";
@@ -309,27 +309,30 @@ int main(int argc, char **argv) {
     fprintf(out, "#include <stdio.h>\n\ntypedef char literal[256];\n\nint main() {\n\t");
     terminal = scanner();
     do {
-      s = atoi(parser_stack.top().c_str());
+      s = atoi(parser_stack.top().first.c_str());
       a = token_to_code(terminal.first);
       if (action[s][a][0] == 'S') {
         t = action[s][a].substr(1, 2);
-        parser_stack.push(terminal.first);
-        parser_stack.push(t);
+        parser_stack.push(make_pair(terminal.first, terminal.second.first));
+        parser_stack.push(make_pair(t, ""));
         terminal = scanner();
         //cout << terminal.first << ":" << terminal.second.first << endl;      
       } else if (action[s][a][0] == 'R') {
         int rule = atoi((action[s][a].substr(1, 2)).c_str());
         semantic(rule);
         for (int i = 1; i <= 2 * rhs_size[rule]; i++) {
+          pair <string, string> aux = parser_stack.top();
+          cout << aux.first << ":" << aux.second << "   ";
           parser_stack.pop();
         }
-        t = parser_stack.top();
+        cout << endl;
+        t = parser_stack.top().first;
         string A = lhs[rule];
-        parser_stack.push(A);
+        parser_stack.push(make_pair(A, ""));
         int u = atoi(t.c_str());
         int nt = nt_to_code(A);
         string new_state = transition[u][nt];
-        parser_stack.push(new_state);
+        parser_stack.push(make_pair(new_state, ""));
         //cout << A << " -> " << Beta[rule] << endl;
       } else if (action[s][a][0] == 'A') {
         cout << "Acc" << endl;
@@ -382,23 +385,23 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lex] = make_pair(token, "=");
         } else if (token == "id") {
           symbol_table[lex] = make_pair(token, "");
-          cout << "inserindo: <" << token << ", " << lex << ">\n";          
+          //cout << "inserindo: <" << token << ", " << lex << ">\n";          
         } else {
           symbol_table[lex] = make_pair(token, lex);          
         }
         lastLex = lex;
-        cout << symbol_table[lex].first << ":" << lex << ":" << symbol_table[lex].second << endl;
+        //cout << symbol_table[lex].first << ":" << lex << ":" << symbol_table[lex].second << endl;
       }
       if (lastState == 9) { // ID
         if (lex == "inteiro" || lex == "literal" || lex == "real") {
-          cout << "atribuindo: <" << token << ", " << lastLex << ", " << lex << ">\n";          
+          //cout << "atribuindo: <" << token << ", " << lastLex << ", " << lex << ">\n";          
           if (symbol_table[lex].first == lex) token = lex;          
           symbol_table[lastLex].second = lex;
         }
       }
       if (symbol_table[lex].first == lex) {
         token = lex;
-        cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
+        //cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
       }
       nextToken = make_pair(token, make_pair(lex, ""));
       lex.clear();
@@ -576,5 +579,10 @@ inline string make_token(int s) {
 void semantic(int rule) {
   if (rule == 5) {
     fprintf(out, "\n\n\n");
+  } else if (rule == 6) {
+    // id.tipo = TIPO.tipo;
+  } else if (rule == 7) {
+    // TIPO.tipo = inteiro.tipo
+    parser_stack.top().first 
   }
 }
