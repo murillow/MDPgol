@@ -162,15 +162,18 @@ string transition[TRANSITION_MAX_STATES][TRANSITION_MAX_NON_TERMINALS] = {
 
 /* Variaveis globais */
 map <string, pair <string, string> > symbol_table; // <Lexema, Token, Atributo>
-stack <pair <string, string> > parser_stack;
+vector <pair <string, pair <string, string> > > parser_stack; // <Token, Lexema, Atributo>
 string lex;
 string lastLex;
 string token;
+vector <string> Tx;
 int line = 1;
 int col = 1;
 int state;
 int lastState;
-FILE *fd, *fopen(), *out;
+int x;
+char buffer[255];
+FILE *fd, *out, *out2, *fopen(), *fprintf();
 
 /* Declaracoes de funcoes */
 int symbol_to_charClass(char);
@@ -181,7 +184,7 @@ void make_token_attr(string, string);
 pair <string, pair <string, string> > scanner (void);
 int token_to_code(string);
 int nt_to_code(string);
-void semantic(int);
+pair <string, string> semantic(int);
 
 /******************************************************************************/
 /* main - driver principal */
@@ -192,6 +195,7 @@ int main(int argc, char **argv) {
   pair <string, pair <string, string> > terminal; // <Token, Lexema, Atributo>
   int a, s;
   string t;
+  char byte;
 
   lhs[1]  = "P'";
   lhs[2]  = "P";
@@ -295,44 +299,44 @@ int main(int argc, char **argv) {
   symbol_table["entao"]      = make_pair("entao", "");
   symbol_table["fimse"]      = make_pair("fimse", "");
   symbol_table["fim"]        = make_pair("fim", "");
-  symbol_table["inteiro"]    = make_pair("inteiro", "");
-  symbol_table["literal"]    = make_pair("literal", "");
-  symbol_table["real"]       = make_pair("real", "");
+  symbol_table["inteiro"]    = make_pair("inteiro", "int");
+  symbol_table["literal"]    = make_pair("literal", "literal");
+  symbol_table["real"]       = make_pair("real", "double");
 
-  parser_stack.push(make_pair("0", ""));  
+  parser_stack.push_back(make_pair("0", make_pair("", "")));  
 
   if ((fd = fopen("texto.alg", "r")) == NULL) {
     cout << "Erro na abertura do programa fonte!\n";
-  } else if ((out = fopen("out.c", "w")) == NULL) {
+  } else if ((out = fopen("out.c", "wb")) == NULL) {
     cout << "Erro na abertura do programa objeto!\n";
   } else {
-    fprintf(out, "#include <stdio.h>\n\ntypedef char literal[256];\n\nint main() {\n\t");
     terminal = scanner();
     do {
-      s = atoi(parser_stack.top().first.c_str());
+      s = atoi(parser_stack.back().first.c_str());
       a = token_to_code(terminal.first);
       if (action[s][a][0] == 'S') {
         t = action[s][a].substr(1, 2);
-        parser_stack.push(make_pair(terminal.first, terminal.second.first));
-        parser_stack.push(make_pair(t, ""));
+        cout << terminal.first << ":" << terminal.second.first << ":" << symbol_table[terminal.second.first].second << endl;
+        parser_stack.push_back(make_pair(terminal.first, make_pair(terminal.second.first, symbol_table[terminal.second.first].second)));
+        parser_stack.push_back(make_pair(t, make_pair("", "")));
         terminal = scanner();
         //cout << terminal.first << ":" << terminal.second.first << endl;      
       } else if (action[s][a][0] == 'R') {
         int rule = atoi((action[s][a].substr(1, 2)).c_str());
-        semantic(rule);
+        pair <string, string> p = semantic(rule);
         for (int i = 1; i <= 2 * rhs_size[rule]; i++) {
-          pair <string, string> aux = parser_stack.top();
-          cout << aux.first << ":" << aux.second << "   ";
-          parser_stack.pop();
+          pair <string, pair <string, string> > aux = parser_stack.back();
+          //cout << aux.first << ":" << aux.second.first << ":" << aux.second.second << "   ";
+          parser_stack.pop_back();
         }
-        cout << endl;
-        t = parser_stack.top().first;
+        //cout << endl;
+        t = parser_stack.back().first;
         string A = lhs[rule];
-        parser_stack.push(make_pair(A, ""));
+        parser_stack.push_back(make_pair(A, p));
         int u = atoi(t.c_str());
         int nt = nt_to_code(A);
         string new_state = transition[u][nt];
-        parser_stack.push(make_pair(new_state, ""));
+        parser_stack.push_back(make_pair(new_state, make_pair("", "")));
         //cout << A << " -> " << Beta[rule] << endl;
       } else if (action[s][a][0] == 'A') {
         cout << "Acc" << endl;
@@ -341,9 +345,30 @@ int main(int argc, char **argv) {
         error_syntatic(action[s][a]);
       }
     } while (true);
-    fprintf(out, "\treturn 0;\n}\n");
+  
+    if ((out2 = fopen("out2.c", "wb")) == NULL) {
+      cout << "Erro na abertura do programa objeto!\n";
+    } else {
+      fprintf(out2, "#include <stdio.h>\n\ntypedef char literal[256];\n\nint main() {\n");
+      fprintf(out2, "\t/*----Variaveis temporarias----*/\n");
+      for (vector <string>::iterator it = Tx.begin(); it != Tx.end(); it++) {
+        fprintf(out2, "\t%s\n", it->c_str());
+      }
+      fprintf(out2, "\t/*-----------------------------*/\n");
+      fclose(out);
+      if ((out = fopen("out.c", "rb")) == NULL) {
+        cout << "Erro na abertura do programa fonte!\n";
+      } else {
+        while (!feof(out)) {
+          fread(&byte, sizeof(char), 1, out);
+          fwrite(&byte, sizeof(char), 1, out2);
+        }
+      }
+      fprintf(out2, "\treturn 0;\n}\n");
+      fclose(out);
+      fclose(out2);
+    }
   }
-
   return 0;
 }
 
@@ -385,7 +410,7 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lex] = make_pair(token, "=");
         } else if (token == "id") {
           symbol_table[lex] = make_pair(token, "");
-          //cout << "inserindo: <" << token << ", " << lex << ">\n";          
+          // cout << "inserindo: <" << token << ", " << lex << ">\n";          
         } else {
           symbol_table[lex] = make_pair(token, lex);          
         }
@@ -399,9 +424,17 @@ pair <string, pair <string, string> > scanner() {
           symbol_table[lastLex].second = lex;
         }
       }
+      if (lastState == 1 || lastState == 3 || lastState == 6) { // num
+        size_t found = lex.find(".");
+        if (found != string::npos) {
+          symbol_table[lastLex].second = "real";
+        } else {
+          symbol_table[lastLex].second = "inteiro";
+        }
+      }
       if (symbol_table[lex].first == lex) {
         token = lex;
-        //cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";                      
+        // cout << "existente: <" << symbol_table[lex].first << ", " << lex << ", " << symbol_table[lex].second << ">\n";
       }
       nextToken = make_pair(token, make_pair(lex, ""));
       lex.clear();
@@ -576,13 +609,108 @@ inline string make_token(int s) {
   }
 }
 
-void semantic(int rule) {
+pair <string, string> semantic(int rule) {
+  // cout << "rule: " << rule << endl;
+  pair <string, pair <string, string> > symbol, symbol2;
+  pair <string, string> p;
   if (rule == 5) {
     fprintf(out, "\n\n\n");
   } else if (rule == 6) {
-    // id.tipo = TIPO.tipo;
-  } else if (rule == 7) {
-    // TIPO.tipo = inteiro.tipo
-    parser_stack.top().first 
+    // id.tipo <- TIPO.tipo;
+    symbol = parser_stack.end()[-4];
+    p.first = symbol.second.first;
+    p.second = symbol.second.second;
+    symbol = parser_stack.end()[-6];
+    // Imprimir ( TIPO.tipo id.lexema ; )
+    //cout << p.second << ":" << symbol.second.first << endl;
+    fprintf(out, "\t%s %s;\n", p.second.c_str(), symbol.second.first.c_str());
+    return p;
+  } else if ((rule >= 7 && rule <= 9) || (rule == 13 || rule == 14 || rule == 19 || rule == 21)) {
+    symbol = parser_stack.end()[-2];
+    p.first = symbol.second.first;
+    p.second = symbol.second.second;
+    return p;
+  } else if (rule == 11) {
+    symbol = parser_stack.end()[-4];
+    if (symbol.second.second != "") {
+      if (symbol.second.second == "literal") {
+        fprintf(out, "\tscanf(\"%%s\", %s);\n", symbol.second.first.c_str());
+      } else if (symbol.second.second == "inteiro") {
+        fprintf(out, "\tscanf(\"%%d\", &%s);\n", symbol.second.first.c_str());
+      } else if (symbol.second.second == "real") {
+        fprintf(out, "\tscanf(\"%%lf\", &%s);\n", symbol.second.first.c_str());
+      }
+    } else {
+      printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);      
+      cout << "erro: variavel nao declarada." << endl;
+      exit(EXIT_FAILURE);
+    }
+  } else if (rule == 12) {
+    symbol = parser_stack.end()[-4];
+    fprintf(out, "\tprintf(%s);\n", symbol.second.first.c_str());
+  } else if (rule == 15) {
+    symbol = parser_stack.end()[-2];
+    if (symbol.second.second != "") {
+      p.first = symbol.second.first;
+      p.second = symbol.second.second;
+      return p;
+    } else {
+      printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);    
+      cout << "erro: variavel nao declarada." << endl;
+      exit(EXIT_FAILURE);      
+    }
+  } else if (rule == 17) {
+    symbol = parser_stack.end()[-8];
+    string rcb = parser_stack.end()[-6].second.second;
+    string ld_tipo = parser_stack.end()[-4].second.second;
+    string ld_lex = parser_stack.end()[-4].second.first;
+    if (symbol.second.second != "") {
+      // cout << symbol.second.second << "***" << ld << endl;
+      if (symbol.second.second == ld_tipo) {
+        fprintf(out, "\t%s %s %s;\n", symbol.second.first.c_str(), rcb.c_str(), ld_lex.c_str());
+      } else {
+        printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);
+        cout << "erro: tipos diferentes para atribuicao." << endl;
+        exit(EXIT_FAILURE);        
+      }
+    } else {
+      printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);  
+      cout << "erro: variavel nao declarada." << endl;
+      exit(EXIT_FAILURE);      
+    }
+  } else if (rule == 18 || rule == 25) {
+    symbol = parser_stack.end()[-4];
+    pair <string, pair <string, string> > oprd1 = parser_stack.end()[-6];
+    pair <string, pair <string, string> > oprd2 = parser_stack.end()[-2];
+    cout << oprd1.second.second << ":" << oprd2.second.second << endl;
+    if (oprd1.second.second == oprd2.second.second) {
+      string T = "T" + string(itoa(x, buffer, 10));
+      x++;
+      Tx.push_back("int " + T + ";");
+      p.first = T;
+      p.second = oprd1.second.second;
+      fprintf(out, "\t%s = %s %s %s;\n", T.c_str(), oprd1.second.first.c_str(), symbol.second.first.c_str(), oprd2.second.first.c_str());
+      return p;
+    } else {
+      printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);  
+      cout << "erro: operandos com tipos incompativeis." << endl;
+      exit(EXIT_FAILURE); 
+    }
+  } else if (rule == 20) {
+    symbol = parser_stack.end()[-2];
+    if (symbol.second.second != "") {
+      p.first = symbol.second.first;
+      p.second = symbol.second.second;
+      return p;
+    } else {
+      printf("texto.alg:%d:%d Erro identificado na analise semantica: ", line, col);
+      cout << "erro: variavel nao declarada." << endl;
+      exit(EXIT_FAILURE);      
+    }
+  } else if (rule == 23) {
+    fprintf(out, "\t}\n");
+  } else if (rule == 24) {
+    symbol = parser_stack.end()[-6];
+    fprintf(out, "\tif (%s) {\n", symbol.second.first.c_str());
   }
 }
